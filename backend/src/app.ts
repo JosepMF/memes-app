@@ -2,6 +2,9 @@ import express, { Application } from "express";
 import path from 'path';
 import morgan from 'morgan'; 
 
+import memeRouter from './routers/memesRouter';
+import usersRouter from './routers/usersRouter';
+
 // settings for app 
 export interface AppSettings {
     port: number;
@@ -13,16 +16,16 @@ export class Server {
     app: Application = express();
 
     constructor(port: number) {
-        this.listen();
         this.settings(port);
         this.middlewares();
-        //this.routers();
+        this.routers();
+        this.listen();
     }
 
     // init routers
     private routers() {
-        this.app.use('/api/users' /* router */);
-        this.app.use('/api/memes' /* router */);
+        this.app.use('/api/users', usersRouter);
+        this.app.use('/api/memes', memeRouter);
     }
 
     // init middlewares
@@ -38,8 +41,9 @@ export class Server {
     }
 
     // init server
-    private listen() {
-        this.app.listen(3000);
+    private async listen() {
+        await this.app.listen(this.app.get('port'));
+        console.log(`[*] the API is locate in a port ${this.app.get('port')}`)
     }
 }
 
