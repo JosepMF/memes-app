@@ -10,7 +10,11 @@ export default function Navigation() {
 
     const { logout, isLogged, hasRole } = useAuth();
 
-    const handlerChange = (e) => setSearch(e.target.value)
+    const handlerChange = (e) => {
+        e.preventDefault();
+        console.log('clik');
+        setSearch(e.target.value)
+    }
     const handlerFilter = (type) => setFilter(type)
 
     return (
@@ -23,7 +27,7 @@ export default function Navigation() {
             <Navbar.Collapse id="responsive-navbar-nav">
                 <Nav style={{ marginRight: "auto" }}>
                     {/* Search form */}
-                    {isLogged() ? <><Form className="d-flex">
+                    {isLogged() ? <><div className="d-flex" onClick={(e) => e.preventDefault()}>
                         <FormControl
                             type="search"
                             placeholder="Search"
@@ -34,7 +38,7 @@ export default function Navigation() {
                             onChange={handlerChange}
                         />
                         <Button as={NavLink} to={`/search?q=${search}&f=${filter}`} variant="outline-success">Search</Button>
-                    </Form>
+                    </div>
                         {/* Filter */}
                         <NavDropdown title="filtres">
                             <NavDropdown.Item as="button" onClick={() => handlerFilter('video')}>
