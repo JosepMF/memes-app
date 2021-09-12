@@ -5,12 +5,44 @@ import jwt from "jsonwebtoken";
 import { connect } from "../database";
 import { User } from "../interfaces/User";
 import { settings } from "../config";
+import { Login } from "interfaces/Login";
+import { validatePasswords } from "../helpers/validatePasswords";
 
 export class UserControllers {
   public static async login(req: Request, res: Response): Promise<Response> {
     try {
-      return res.status(200).json({ message: "OK" });
+      // data from frontend
+      const newLogin: Login = req.body;
+
+      // creating conexion with database
+      const conn = await connect();
+
+      // the query for find the user
+      const query = await conn.query("SELECT * FROM users WHERE EMAIL=?", [
+        newLogin.EMAIL,
+      ]);
+      const data: any = await query[0];
+
+      const password: string = data[0].PASSWORD;
+
+      // create token
+      const token: string = await jwt.sign(
+        { _id: query[0] },
+        settings.tokenSettings.secret
+      );
+
+      // verifay passwords
+      if (await validatePasswords(newLogin.PASSWORD, password)) {
+        const user: any = query[0];
+        return res.header("auth-token", token)
+          .status(200)
+          .json({ auth: true, user: user[0], token })
+      } else {
+        return res.status(400).json({ error: "the passwor are incorrect" });
+      }
     } catch (error) {
+      console.error(error);
+
       return res.status(500).json({ error: "fatal internal error" });
     }
   }
@@ -27,25 +59,26 @@ export class UserControllers {
       await conn.query("INSERT INTO users SET ?", [newUser]);
 
       // search user created
-      const response = await conn.query("SELECT * FROM users WHERE EMAIL=?", [
+      const query = await conn.query("SELECT * FROM users WHERE EMAIL=?", [
         newUser.EMAIL,
       ]);
 
       // creating token
-      const token: string = await jwt.sign({ _id: response[0] }, settings.tokenSettings.secret);
+      const token: string = await jwt.sign(
+        { _id: query[0] },
+        settings.tokenSettings.secret
+      );
 
       // response to client
-      return res
-        .status(200)
-        .header('auth-token', token)
-        .json({
-          message: "user was created successfully",
-          user: response[0],
-          token
-        });
+      return res.status(200).header("auth-token", token).json({
+        auth: true,
+        message: "user was created successfully",
+        user: query[0],
+        token,
+      });
     } catch (error) {
       // detecting errors
-      return res.status(500).json({ error: "fatal internal error" });
+      return res.status(500).json({ error: "the user is exist" });
     }
   }
   public static async logout(req: Request, res: Response): Promise<Response> {
