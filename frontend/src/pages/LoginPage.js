@@ -7,8 +7,8 @@ export default function LoginPage() {
     const { login } = useAuth();
 
     const [credentials, setCredentials] = useState({
-        email: '',
-        password: ''
+        EMAIL: '',
+        PASSWORD: ''
     });
     const [alert, setAlert] = useState(false);
 
@@ -16,10 +16,21 @@ export default function LoginPage() {
 
     const handlerChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
     const handlerSubmit = () => {
-        if (credentials.email === '' | credentials.password === '' | !regularExpresionEmail.test(credentials.email)) {
+        if (credentials.EMAIL === '' | credentials.PASSWORD === '' | !regularExpresionEmail.test(credentials.EMAIL)) {
             setAlert(true)
         } else {
-            login(credentials)
+            fetch(`http://localhost:3001/api/users/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(credentials)
+                
+            })
+                .then((res) => res.json())
+                .then((res) => login(res.user));
+            
         }
     }
 
@@ -27,24 +38,24 @@ export default function LoginPage() {
         <Container>
             <Row className="mt-4">
                 <Col xs={12} className="text-center">
-                    <Card className="p-4 text-white" style={{ maxWidth: "360px", margin: "auto", backgroundColor: "rgba(255,255,255,0.025)"}}>
-                    {
-                        alert ? <Alert variant="danger">
-                            <ul>
-                                {!credentials.email ? <li className="text-dark">the email is required</li> : ''}
-                                {!credentials.password ? <li className="text-dark">the password is required</li> : ''}
-                                {!regularExpresionEmail.test(credentials.email) ? <li className="text-dark">the email is not vaild</li> : ''}
-                                {credentials.email && credentials.password ? setAlert(false) : ''}
-                            </ul>
-                        </Alert> : ''
-                    }
-                    <h3 className="text-primary">Login</h3>
-                    <Form>
-                        <FormControl type="email" name="email" placeholder="Email" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} className="text-white mt-4" onChange={handlerChange} />
-                        <FormControl type="password" className="mt-2 text-white" name="password" placeholder="Password" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} onChange={handlerChange} />
-                    </Form>
-                    <Button variant="outline-primary" className="mt-4" onClick={handlerSubmit}>login</Button>
-                    <p className="text-white mt-4">or <span className="text-primary"><Link to="/register">register</Link></span></p>
+                    <Card className="p-4 text-white" style={{ maxWidth: "360px", margin: "auto", backgroundColor: "rgba(255,255,255,0.025)" }}>
+                        {
+                            alert ? <Alert variant="danger">
+                                <ul>
+                                    {!credentials.EMAIL ? <li className="text-dark">the email is required</li> : ''}
+                                    {!credentials.PASSWORD ? <li className="text-dark">the password is required</li> : ''}
+                                    {!regularExpresionEmail.test(credentials.EMAIL) ? <li className="text-dark">the email is not vaild</li> : ''}
+                                    {credentials.EMAIL && credentials.PASSWORD ? setAlert(false) : ''}
+                                </ul>
+                            </Alert> : ''
+                        }
+                        <h3 className="text-primary">Login</h3>
+                        <Form>
+                            <FormControl type="email" name="EMAIL" placeholder="Email" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} className="text-white mt-4" onChange={handlerChange} />
+                            <FormControl type="password" className="mt-2 text-white" name="PASSWORD" placeholder="Password" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} onChange={handlerChange} />
+                        </Form>
+                        <Button variant="outline-primary" className="mt-4" onClick={handlerSubmit}>login</Button>
+                        <p className="text-white mt-4">or <span className="text-primary"><Link to="/register">register</Link></span></p>
                     </Card>
                 </Col>
             </Row>

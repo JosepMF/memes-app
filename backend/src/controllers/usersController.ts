@@ -13,7 +13,7 @@ export class UserControllers {
     try {
       // data from frontend
       const newLogin: Login = req.body;
-
+      
       // creating conexion with database
       const conn = await connect();
 

@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import path from 'path';
 import morgan from 'morgan'; 
+import cors from 'cors'
 
 import memeRouter from './routers/memesRouter';
 import usersRouter from './routers/usersRouter';
@@ -33,8 +34,9 @@ export class Server {
         this.app.use(express.static(path.join(__dirname, 'uploads')));
         this.app.use(morgan('dev'));
         this.app.use(express.json());
+        this.app.use(cors())
     }
-
+ 
     // init settings
     private settings(port: number) {
         this.app.set('port', port);

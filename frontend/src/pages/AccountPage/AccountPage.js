@@ -45,13 +45,13 @@ export default function AccountPage() {
           <Col className="mt-2">
             <Card className="p-4 text-white" style={{ maxWidth: "360px", margin: "auto", backgroundColor: "rgba(255,255,255,0.025)" }}>
               <p className="text-center">
-                <b>Name:</b> {user.username}
+                <b>Name:</b> {user.USERNAME}
               </p>
               <p className="text-center">
-                <b>Email:</b> {user.email}
+                <b>Email:</b> {user.EMAIL}
               </p>
               <p className="text-center">
-                <b>Role:</b> {user.role}
+                <b>Role:</b> {user.ROLE}
               </p>
 
               <Button variant="outline-primary" onClick={() => openModal2()}>upload meme</Button>
