@@ -25,6 +25,8 @@ export default function AccountPage() {
   const openModal4 = () => setOpenModalDeleteAccount(true);
   const openModal5 = () => setOpenModalProfilePic(true);
 
+  console.log(user);
+
   return (
     <>
       <Container>

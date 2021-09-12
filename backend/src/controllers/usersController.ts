@@ -70,13 +70,16 @@ export class UserControllers {
       );
 
       // response to client
+      const data:any = query[0];
+
       return res.status(200).header("auth-token", token).json({
         auth: true,
-        message: "user was created successfully",
-        user: query[0],
+        user: data[0],
         token,
       });
     } catch (error) {
+      console.error(error);
+      
       // detecting errors
       return res.status(500).json({ error: "the user is exist" });
     }
