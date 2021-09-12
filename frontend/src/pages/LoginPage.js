@@ -29,7 +29,7 @@ export default function LoginPage() {
                 
             })
                 .then((res) => res.json())
-                .then((res) => login(res.user));
+                .then((res) => login(res));
             
         }
     }
