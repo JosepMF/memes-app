@@ -14,9 +14,23 @@ export default function RegisterPage() {
     });
     const [alert, setAlert] = useState(false);
 
+    const [serverError, setServerError] = useState(null)
+
+
     const handlerChange = (e) => setCredentials({ ...credentials, [e.target?.name]: e.target?.value });
 
     const regularExpresionEmail = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+
+    const analaicingDataOfServer = (data) => {
+        if (data?.auth) {
+            login(data);
+        }
+        else if (data?.error) {
+            setServerError(data?.error)
+            setAlert(true)
+        }
+
+    }
 
     const handlerSubmit = () => {
         if (
@@ -47,7 +61,7 @@ export default function RegisterPage() {
 
             })
                 .then((res) => res.json())
-                .then((res) => login(res));
+                .then((res) => analaicingDataOfServer(res));
         }
     }
 

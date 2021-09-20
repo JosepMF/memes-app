@@ -2,9 +2,18 @@ import { Modal, Button } from 'react-bootstrap'
 import useAuth from '../../../auth/useAuth'
 
 export default function DeleteAccountModal({ show, close }) {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
 
     const deleteAccount = () => {
+        console.log(user);
+        fetch(`http://localhost:3001/api/users/delete/${user.user.ID}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'auth-token': user.token
+            }
+        })
         logout();
     }
 

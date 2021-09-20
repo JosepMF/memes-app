@@ -16,7 +16,7 @@
  router.post("/logout", UserControllers.logout);
  router.put("/changepassword/:userID", UserControllers.changePassword);
  router.put("/edituser/:userID", UserControllers.editAccount);
- router.delete("/:userID", UserControllers.deleteAccount);
+ router.delete("/delete/:userID", UserControllers.deleteAccount);
  
  /*end router content*/
  

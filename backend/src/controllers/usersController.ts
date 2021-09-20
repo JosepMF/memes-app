@@ -7,6 +7,7 @@ import { User } from "../interfaces/User";
 import { settings } from "../config";
 import { Login } from "interfaces/Login";
 import { validatePasswords } from "../helpers/validatePasswords";
+import createToken from "../helpers/createToken";
 
 export class UserControllers {
   public static async login(req: Request, res: Response): Promise<Response> {
@@ -26,10 +27,7 @@ export class UserControllers {
       const password: string = data[0].PASSWORD;
 
       // create token
-      const token: string = await jwt.sign(
-        { _id: query[0] },
-        settings.tokenSettings.secret
-      );
+      const token: string = await createToken(query);
 
       // verifay passwords
       if (await validatePasswords(newLogin.PASSWORD, password)) {
@@ -64,10 +62,7 @@ export class UserControllers {
       ]);
 
       // creating token
-      const token: string = await jwt.sign(
-        { _id: query[0] },
-        settings.tokenSettings.secret
-      );
+      const token: string = await createToken(query);
 
       // response to client
       const data:any = query[0];
@@ -116,8 +111,18 @@ export class UserControllers {
     res: Response
   ): Promise<Response> {
     try {
-      return res.status(200).json({ message: "OK" });
+      const token:string|string[]|any = req.headers["auth-token"]
+
+      if(await jwt.verify(token, settings.tokenSettings.secret)){
+        const conn = await connect();
+        conn.query("DELETE FROM `users` WHERE `users`.`ID`=?", [req.params.userID])
+
+        return res.status(200).json({ message: "user was delete successfully" });
+      }
+      return res.status(200).json({ message: "NO" });
     } catch (error) {
+      console.log(error);
+      
       return res.status(500).json({ error: "fatal internal error" });
     }
   }

@@ -5,18 +5,38 @@ import { Link } from "react-router-dom";
 
 export default function LoginPage() {
     const { login } = useAuth();
+    
+    const [alert, setAlert] = useState(false);
+
+    const [serverError, setServerError] = useState(null)
+
 
     const [credentials, setCredentials] = useState({
         EMAIL: '',
         PASSWORD: ''
     });
-    const [alert, setAlert] = useState(false);
+
+    const analaicingDataOfServer = (data) => {
+        if (data?.auth) {
+            login(data);
+        }
+        else if (data?.error) {
+            setServerError(data?.error)
+            setAlert(true)
+            console.log(alert);
+        }
+
+    }
 
     const regularExpresionEmail = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
 
     const handlerChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
     const handlerSubmit = () => {
-        if (credentials.EMAIL === '' | credentials.PASSWORD === '' | !regularExpresionEmail.test(credentials.EMAIL)) {
+        if (
+            credentials.EMAIL === '' | 
+            credentials.PASSWORD === '' | 
+            !regularExpresionEmail.test(credentials.EMAIL)
+        ) {
             setAlert(true)
         } else {
             fetch(`http://localhost:3001/api/users/login`, {
@@ -26,11 +46,11 @@ export default function LoginPage() {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify(credentials)
-                
+
             })
                 .then((res) => res.json())
-                .then((res) => login(res));
-            
+                .then((res) => analaicingDataOfServer(res));
+
         }
     }
 
@@ -44,6 +64,7 @@ export default function LoginPage() {
                                 <ul>
                                     {!credentials.EMAIL ? <li className="text-dark">the email is required</li> : ''}
                                     {!credentials.PASSWORD ? <li className="text-dark">the password is required</li> : ''}
+                                    {serverError ? <li className="text-dark">the password isn't exactly correct</li> : ''}
                                     {!regularExpresionEmail.test(credentials.EMAIL) ? <li className="text-dark">the email is not vaild</li> : ''}
                                     {credentials.EMAIL && credentials.PASSWORD ? setAlert(false) : ''}
                                 </ul>
