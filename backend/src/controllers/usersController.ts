@@ -8,6 +8,7 @@ import { settings } from "../config";
 import { Login } from "interfaces/Login";
 import { validatePasswords } from "../helpers/validatePasswords";
 import createToken from "../helpers/createToken";
+import EditUser from "interfaces/EditUser";
 
 export class UserControllers {
   public static async login(req: Request, res: Response): Promise<Response> {
@@ -101,8 +102,16 @@ export class UserControllers {
     res: Response
   ): Promise<Response> {
     try {
-      return res.status(200).json({ message: "OK" });
+      const userEdit: EditUser = req.body;
+      
+      const conn = await connect();
+      
+      await conn.query("UPDATE `users` SET `USERNAME`=? WHERE `users`.`ID`=?", [userEdit.NAMEUSER, req.params.userID]);
+
+      return res.status(200).json({ message: "user edited successfully" });
     } catch (error) {
+      console.error(error);
+      
       return res.status(500).json({ error: "fatal internal error" });
     }
   }
@@ -119,7 +128,7 @@ export class UserControllers {
 
         return res.status(200).json({ message: "user was delete successfully" });
       }
-      return res.status(200).json({ message: "NO" });
+      return res.status(200).json({ auth: false, error: "no token provided" });
     } catch (error) {
       console.log(error);
       
