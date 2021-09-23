@@ -9,13 +9,14 @@ import { Login } from "interfaces/Login";
 import { validatePasswords } from "../helpers/validatePasswords";
 import createToken from "../helpers/createToken";
 import EditUser from "interfaces/EditUser";
+import NewPassword from "../interfaces/NewPassword";
 
 export class UserControllers {
   public static async login(req: Request, res: Response): Promise<Response> {
     try {
       // data from frontend
       const newLogin: Login = req.body;
-      
+
       // creating conexion with database
       const conn = await connect();
 
@@ -33,9 +34,10 @@ export class UserControllers {
       // verifay passwords
       if (await validatePasswords(newLogin.PASSWORD, password)) {
         const user: any = query[0];
-        return res.header("auth-token", token)
+        return res
+          .header("auth-token", token)
           .status(200)
-          .json({ auth: true, user: user[0], token })
+          .json({ auth: true, user: user[0], token });
       } else {
         return res.status(400).json({ error: "the passwor are incorrect" });
       }
@@ -66,7 +68,7 @@ export class UserControllers {
       const token: string = await createToken(query);
 
       // response to client
-      const data:any = query[0];
+      const data: any = query[0];
 
       return res.status(200).header("auth-token", token).json({
         auth: true,
@@ -75,7 +77,7 @@ export class UserControllers {
       });
     } catch (error) {
       console.error(error);
-      
+
       // detecting errors
       return res.status(500).json({ error: "the user is exist" });
     }
@@ -92,7 +94,26 @@ export class UserControllers {
     res: Response
   ): Promise<Response> {
     try {
-      return res.status(200).json({ message: "OK" });
+      const token: string | string[] | any = req.headers["auth-token"];
+
+      if (await jwt.verify(token, settings.tokenSettings.secret)) {
+        const newPassword: NewPassword = req.body;
+
+        newPassword.PASSWORD = await encryptPassword(newPassword.PASSWORD);
+
+        const conn = await connect();
+
+        await conn.query(
+          "UPDATE `users` SET `PASSWORD`=? WHERE `users`.`ID`=?",
+          [newPassword.PASSWORD, req.params.userID]
+        );
+
+        return res.status(200).json({ message: "user changed password successfully" });
+      } else {
+        return res
+          .status(401)
+          .json({ auth: false, message: "no token provided" });
+      }
     } catch (error) {
       return res.status(500).json({ error: "fatal internal error" });
     }
@@ -102,16 +123,27 @@ export class UserControllers {
     res: Response
   ): Promise<Response> {
     try {
-      const userEdit: EditUser = req.body;
-      
-      const conn = await connect();
-      
-      await conn.query("UPDATE `users` SET `USERNAME`=? WHERE `users`.`ID`=?", [userEdit.NAMEUSER, req.params.userID]);
+      const token: string | string[] | any = req.headers["auth-token"];
 
-      return res.status(200).json({ message: "user edited successfully" });
+      if (await jwt.verify(token, settings.tokenSettings.secret)) {
+        const userEdit: EditUser = req.body;
+
+        const conn = await connect();
+
+        await conn.query(
+          "UPDATE `users` SET `USERNAME`=? WHERE `users`.`ID`=?",
+          [userEdit.NAMEUSER, req.params.userID]
+        );
+
+        return res.status(200).json({ message: "user edited successfully" });
+      } else {
+        return res
+          .status(401)
+          .json({ auth: false, message: "no token provided" });
+      }
     } catch (error) {
       console.error(error);
-      
+
       return res.status(500).json({ error: "fatal internal error" });
     }
   }
@@ -120,18 +152,22 @@ export class UserControllers {
     res: Response
   ): Promise<Response> {
     try {
-      const token:string|string[]|any = req.headers["auth-token"]
+      const token: string | string[] | any = req.headers["auth-token"];
 
-      if(await jwt.verify(token, settings.tokenSettings.secret)){
+      if (await jwt.verify(token, settings.tokenSettings.secret)) {
         const conn = await connect();
-        conn.query("DELETE FROM `users` WHERE `users`.`ID`=?", [req.params.userID])
+        conn.query("DELETE FROM `users` WHERE `users`.`ID`=?", [
+          req.params.userID,
+        ]);
 
-        return res.status(200).json({ message: "user was delete successfully" });
+        return res
+          .status(200)
+          .json({ message: "user was delete successfully" });
       }
       return res.status(200).json({ auth: false, error: "no token provided" });
     } catch (error) {
       console.log(error);
-      
+
       return res.status(500).json({ error: "fatal internal error" });
     }
   }

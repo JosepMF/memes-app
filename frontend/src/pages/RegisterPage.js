@@ -14,8 +14,6 @@ export default function RegisterPage() {
     });
     const [alert, setAlert] = useState(false);
 
-    const [serverError, setServerError] = useState(null)
-
 
     const handlerChange = (e) => setCredentials({ ...credentials, [e.target?.name]: e.target?.value });
 
@@ -26,7 +24,6 @@ export default function RegisterPage() {
             login(data);
         }
         else if (data?.error) {
-            setServerError(data?.error)
             setAlert(true)
         }
 

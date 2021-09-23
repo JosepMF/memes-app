@@ -1,13 +1,12 @@
 import { Container, Row, Col, Image, Card, Button, ButtonGroup } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 
-export default function OneMemePage({ memeFile }) {
+export default function OneMemePage() {
 
     const location = useLocation();
 
     const query = new URLSearchParams(location.search);
 
-    const id = query.get('id');
     const meme = query.get('m');
 
     return (
